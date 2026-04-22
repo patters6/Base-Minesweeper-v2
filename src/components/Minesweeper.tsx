@@ -2,7 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { createBoard, revealCell, type Cell, type GameStatus } from '../lib/minesweeper';
 import { cn } from '../lib/utils';
-import { useAccount, useSendTransaction, useConnect } from 'wagmi';
+import { useAccount, useSendTransaction, useConnect, useWriteContract } from 'wagmi';
+import { base } from 'wagmi/chains';
+import { BASE_SWEEPER_ABI } from '../constants/abi';
+import { parseEther } from 'viem';
 
 const ROWS = 10;
 const COLS = 10;
@@ -10,6 +13,9 @@ const MINES = 15;
 
 // Base Ecosystem App ID for attribution.
 const BUILDER_CODE = '0x69e918db56caa7489826f560'; 
+
+// SET YOUR CONTRACT ADDRESS HERE AFTER DEPLOYMENT
+const CONTRACT_ADDRESS = '0x5422E42E4a1DcC41Db4C0Fc10C43C59bFd7615fC'; 
 
 export const Minesweeper: React.FC = () => {
   const [board, setBoard] = useState<Cell[][]>([]);
@@ -21,6 +27,7 @@ export const Minesweeper: React.FC = () => {
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { sendTransaction } = useSendTransaction();
+  const { writeContract } = useWriteContract();
 
   const initGame = useCallback(() => {
     setBoard(createBoard(ROWS, COLS, MINES));
@@ -91,16 +98,24 @@ export const Minesweeper: React.FC = () => {
   const handleCheckIn = async () => {
     if (!isConnected || !address) return;
 
-    // "Free check-in" means we send a 0-value transaction to ourselves
-    // but append the Builder Code to the data field to support the Base ecosystem attribution.
     try {
-      sendTransaction({
-        to: address, // Self-transaction
-        value: 0n,
-        // Append builder code to the data field
-        // Builders can get a specific ID for their app.
-        data: BUILDER_CODE as `0x${string}`,
-      });
+      if (CONTRACT_ADDRESS) {
+        // If contract is deployed, call the checkIn function
+        writeContract({
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: BASE_SWEEPER_ABI,
+          functionName: 'checkIn',
+          account: address,
+          chain: base,
+        });
+      } else {
+        // Fallback: "Free check-in" via self-transaction with builder data
+        sendTransaction({
+          to: address,
+          value: 0n,
+          data: BUILDER_CODE as `0x${string}`,
+        });
+      }
     } catch (err) {
       console.error('Check-in failed:', err);
     }
