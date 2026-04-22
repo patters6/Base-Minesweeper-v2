@@ -2,14 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { createBoard, revealCell, type Cell, type GameStatus } from '../lib/minesweeper';
 import { cn } from '../lib/utils';
-import { useAccount, useSendTransaction } from 'wagmi';
+import { useAccount, useSendTransaction, useConnect } from 'wagmi';
 
 const ROWS = 10;
 const COLS = 10;
 const MINES = 15;
 
-// Example Builder Code: In production, developers get this from the Base ecosystem.
-const BUILDER_CODE = '0x1337BEEF'; 
+// Base Ecosystem App ID for attribution.
+const BUILDER_CODE = '0x69e918db56caa7489826f560'; 
 
 export const Minesweeper: React.FC = () => {
   const [board, setBoard] = useState<Cell[][]>([]);
@@ -19,6 +19,7 @@ export const Minesweeper: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
 
   const { isConnected, address } = useAccount();
+  const { connect, connectors } = useConnect();
   const { sendTransaction } = useSendTransaction();
 
   const initGame = useCallback(() => {
@@ -134,12 +135,14 @@ export const Minesweeper: React.FC = () => {
             <h3 className="text-xs text-base-blue uppercase tracking-widest mb-2 font-bold">Daily Check-In</h3>
             <p className="text-xs text-gray-400 leading-relaxed mb-4">Claim your daily multiplier. Gas only interaction on Base.</p>
             <button 
-              onClick={handleCheckIn}
-              disabled={!isConnected}
-              className={cn(
-                "w-full py-3 bg-base-blue hover:bg-base-blue/80 text-white rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer",
-                !isConnected && "opacity-50 cursor-not-allowed"
-              )}
+              onClick={() => {
+                if (!isConnected) {
+                  connect({ connector: connectors[0] });
+                } else {
+                  handleCheckIn();
+                }
+              }}
+              className="w-full py-3 bg-base-blue hover:bg-base-blue/80 text-white rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer"
             >
               {isConnected ? 'CLAIM REWARD' : 'CONNECT WALLET'}
             </button>
