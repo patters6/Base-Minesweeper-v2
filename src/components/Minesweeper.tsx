@@ -122,9 +122,9 @@ export const Minesweeper: React.FC = () => {
   };
 
   return (
-    <main className="flex p-8 gap-8 items-start justify-center overflow-auto min-h-full">
+    <main className="flex flex-col lg:flex-row p-4 lg:p-8 gap-8 items-center lg:items-start justify-center overflow-auto min-h-full">
       {/* Side Stats Panel */}
-      <div className="w-64 space-y-6 hidden lg:block shrink-0">
+      <div className="w-full lg:w-64 space-y-6 shrink-0">
         <div className="bg-base-surface border border-white/10 p-5 rounded-2xl">
           <h3 className="text-xs text-gray-500 uppercase tracking-widest mb-4 font-bold">Live Session</h3>
           <div className="space-y-4">
