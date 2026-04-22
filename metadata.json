@@ -1,0 +1,6 @@
+{
+  "name": "Base Minesweeper",
+  "description": "A modern, sleek Minesweeper game built for the Base ecosystem. Features free on-chain check-ins with gas-only payments and Builder Code attribution.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
